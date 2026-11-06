@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#183c4a">
+  <title>LIAME</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f3f0e9;
+      color: #183c4a;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    main { padding: 28px; max-width: 420px; }
+    h1 { font-size: 52px; margin-bottom: 8px; }
+    p { font-size: 20px; line-height: 1.5; }
+    button {
+      margin-top: 25px;
+      padding: 20px 28px;
+      border: 0;
+      border-radius: 40px;
+      background: #183c4a;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    #message { min-height: 65px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>LIAME</h1>
+    <p>Plus de lien, plus d'humain, plus de vie.</p>
+    <p id="message">Bonjour Janine !</p>
+    <button onclick="parler()">🔊 Écouter LIAME</button>
+  </main>
+  <script>
+    function parler() {
+      const texte = "Bonjour Janine ! Je suis LIAME. Je suis très heureux de faire ta connaissance. Comment vas-tu aujourd'hui ?";
+      document.getElementById("message").textContent = texte;
+      if (!("speechSynthesis" in window)) {
+        alert("La synthèse vocale n'est pas disponible.");
+        return;
+      }
+      speechSynthesis.cancel();
+      const voix = new SpeechSynthesisUtterance(texte);
+      voix.lang = "fr-FR";
+      voix.rate = 0.9;
+      voix.pitch = 0.95;
+      speechSynthesis.speak(voix);
+    }
+  </script>
+</body>
+</html>
