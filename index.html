@@ -1,60 +1,153 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#183c4a">
-  <title>LIAME</title>
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #f3f0e9;
-      color: #183c4a;
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    main { padding: 28px; max-width: 420px; }
-    h1 { font-size: 52px; margin-bottom: 8px; }
-    p { font-size: 20px; line-height: 1.5; }
-    button {
-      margin-top: 25px;
-      padding: 20px 28px;
-      border: 0;
-      border-radius: 40px;
-      background: #183c4a;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    #message { min-height: 65px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#183c4a">
+<title>LIAME</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;background:#f3f0e9;
+ color:#183c4a;font-family:Arial,sans-serif;
+ display:flex;align-items:center;justify-content:center;
+ text-align:center
+}
+main{width:100%;max-width:480px;padding:25px}
+h1{font-size:52px;margin:0 0 8px}
+.slogan{font-size:16px;margin-bottom:35px}
+.bulle{
+ background:white;border-radius:20px;
+ padding:18px;margin:15px 0;
+ font-size:19px;line-height:1.5;text-align:left
+}
+.etiquette{font-size:13px;font-weight:bold;opacity:.7}
+button{
+ background:#183c4a;color:white;border:0;
+ border-radius:35px;padding:19px 25px;
+ font-size:19px;width:100%;margin-top:12px
+}
+button:disabled{opacity:.5}
+#statut{font-size:15px;min-height:24px;margin-top:18px}
+</style>
 </head>
 <body>
-  <main>
-    <h1>LIAME</h1>
-    <p>Plus de lien, plus d'humain, plus de vie.</p>
-    <p id="message">Bonjour Janine !</p>
-    <button onclick="parler()">🔊 Écouter LIAME</button>
-  </main>
-  <script>
-    function parler() {
-      const texte = "Bonjour Janine ! Je suis LIAME. Je suis très heureux de faire ta connaissance. Comment vas-tu aujourd'hui ?";
-      document.getElementById("message").textContent = texte;
-      if (!("speechSynthesis" in window)) {
-        alert("La synthèse vocale n'est pas disponible.");
-        return;
-      }
-      speechSynthesis.cancel();
-      const voix = new SpeechSynthesisUtterance(texte);
-      voix.lang = "fr-FR";
-      voix.rate = 0.9;
-      voix.pitch = 0.95;
-      speechSynthesis.speak(voix);
-    }
-  </script>
+<main>
+<h1>LIAME</h1>
+<p class="slogan">Plus de lien, plus d'humain, plus de vie.</p>
+
+<div class="bulle">
+ <div class="etiquette">LIAME</div>
+ <div id="reponse">Bonjour Janine !</div>
+</div>
+
+<div class="bulle">
+ <div class="etiquette">VOUS</div>
+ <div id="paroles">Appuie sur le micro pour me parler.</div>
+</div>
+
+<button id="micro" onclick="ecouter()">🎙️ Parler à LIAME</button>
+<button onclick="saluer()">🔊 Écouter LIAME</button>
+<p id="statut">Prêt à discuter.</p>
+</main>
+
+<script>
+const Reconnaissance =
+ window.SpeechRecognition ||
+ window.webkitSpeechRecognition;
+
+const micro=document.getElementById("micro");
+const statut=document.getElementById("statut");
+const paroles=document.getElementById("paroles");
+const reponse=document.getElementById("reponse");
+
+let reconnaissance=null;
+let enCours=false;
+
+function dire(texte){
+ reponse.textContent=texte;
+ if(!("speechSynthesis" in window)){
+  statut.textContent="Voix non disponible.";
+  return;
+ }
+ speechSynthesis.cancel();
+ const phrase=new SpeechSynthesisUtterance(
+  texte.replace(/LIAME/gi,"Liame")
+ );
+ phrase.lang="fr-FR";
+ phrase.rate=0.9;
+ phrase.pitch=0.95;
+ phrase.onerror=()=>{statut.textContent="Erreur de lecture vocale.";};
+ speechSynthesis.speak(phrase);
+}
+
+function saluer(){
+ dire("Bonjour Janine ! Je suis Liame. Comment vas-tu aujourd'hui ?");
+}
+
+function repondre(texte){
+ const t=texte.toLocaleLowerCase("fr-FR");
+ let r;
+ if(t.includes("bonjour")||t.includes("salut")){
+  r="Bonjour Janine ! Je suis content de t'entendre. Comment vas-tu ?";
+ }else if(t.includes("comment")&&t.includes("vas")){
+  r="Je vais très bien, merci ! Et toi, raconte-moi ta journée.";
+ }else if(t.includes("bien")||t.includes("ça va")){
+  r="Ça me fait plaisir ! Qu'est-ce qui t'a fait sourire aujourd'hui ?";
+ }else if(t.includes("nouvelle")||t.includes("famille")){
+  r="Pour le moment, je n'ai pas encore accès aux nouvelles de ta famille. Nous allons bientôt y remédier.";
+ }else if(t.includes("jeu")||t.includes("quiz")){
+  r="Avec plaisir ! Nous préparons un grand jeu de questions ensemble.";
+ }else if(t.includes("au revoir")){
+  r="À bientôt Janine ! Prends bien soin de toi.";
+ }else{
+  r="Je t'ai entendue, Janine. Pour le moment, j'apprends encore à discuter. Bientôt, nous pourrons parler de beaucoup plus de choses.";
+ }
+ dire(r);
+}
+
+function ecouter(){
+ if(!Reconnaissance){
+  statut.textContent="Reconnaissance vocale indisponible dans ce navigateur.";
+  return;
+ }
+ if(enCours)return;
+ speechSynthesis.cancel();
+ reconnaissance=new Reconnaissance();
+ reconnaissance.lang="fr-FR";
+ reconnaissance.continuous=false;
+ reconnaissance.interimResults=false;
+ reconnaissance.maxAlternatives=1;
+ reconnaissance.onstart=()=>{
+  enCours=true;
+  micro.disabled=true;
+  statut.textContent="Je t'écoute...";
+ };
+ reconnaissance.onresult=(event)=>{
+  const texte=event.results[0][0].transcript;
+  paroles.textContent=texte;
+  statut.textContent="J'ai entendu ta phrase.";
+  repondre(texte);
+ };
+ reconnaissance.onerror=(event)=>{
+  statut.textContent="Micro : "+event.error+
+   ". Vérifie les autorisations ou réessaie.";
+ };
+ reconnaissance.onend=()=>{
+  enCours=false;
+  micro.disabled=false;
+  if(statut.textContent==="Je t'écoute..."){
+   statut.textContent="Je n'ai rien entendu. Réessaie.";
+  }
+ };
+ try{
+  reconnaissance.start();
+ }catch(e){
+  enCours=false;
+  micro.disabled=false;
+  statut.textContent="Impossible de démarrer le micro.";
+ }
+}
+</script>
 </body>
 </html>
