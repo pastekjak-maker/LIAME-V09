@@ -195,7 +195,32 @@ function ecouter(){
   const texte=event.results[0][0].transcript;
   paroles.textContent=texte;
   statut.textContent="J'ai entendu ta phrase.";
-  repondre(texte);
+  if (!liameJeton) {
+  statut.textContent = "Connecte-toi d'abord avec Tester le cerveau IA.";
+  return;
+}
+statut.textContent = "LIAME réfléchit...";
+fetch(SUPABASE_URL + "/functions/v1/liame-cerveau", {
+  method: "POST",
+  headers: {
+    "apikey": SUPABASE_PUBLIC_KEY,
+    "Authorization": "Bearer " + liameJeton,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ message: texte })
+})
+.then(async response => {
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Erreur " + response.status);
+  return data;
+})
+.then(data => {
+  if (!data.message) throw new Error("Réponse vide");
+  dire(data.message);
+})
+.catch(error => {
+  statut.textContent = "Erreur LIAME : " + error.message;
+});
  };
  reconnaissance.onerror=(event)=>{
   statut.textContent="Micro : "+event.error+
