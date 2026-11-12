@@ -55,7 +55,73 @@ button:disabled{opacity:.5}
 </main>
 
 <script>
-const Reconnaissance =
+ const SUPABASE_PUBLIC_KEY = "sb_publishable_zXi0xAmuK1vrMaEkCN2gxg_MFCyxvmW";
+const SUPABASE_URL = "https://ymsetvfrvpqtudvypktn.supabase.co";
+ let liameJeton = "";
+
+const zoneTest = document.createElement("section");
+zoneTest.innerHTML =
+  '<input id="liame-email" type="email" placeholder="E-mail du compte test" autocomplete="username" style="width:100%;padding:12px;margin:6px 0">' +
+  '<input id="liame-mdp" type="password" placeholder="Mot de passe" autocomplete="current-password" style="width:100%;padding:12px;margin:6px 0">' +
+  '<button id="liame-test" type="button">Tester le cerveau IA</button>' +
+  '<p id="liame-resultat"></p>';
+document.querySelector("main").prepend(zoneTest);
+
+document.getElementById("liame-test").addEventListener("click", async () => {
+  const resultat = document.getElementById("liame-resultat");
+  const email = document.getElementById("liame-email").value.trim();
+  const password = document.getElementById("liame-mdp").value;
+
+  if (!email || !password) {
+    resultat.textContent = "Entre ton e-mail et ton mot de passe de test.";
+    return;
+  }
+
+  resultat.textContent = "Connexion en cours...";
+
+  try {
+    const authResponse = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_PUBLIC_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email: email, password: password })
+    });
+
+    const auth = await authResponse.json();
+    if (!authResponse.ok || !auth.access_token) {
+      throw new Error("Connexion refusée (" + authResponse.status + ")");
+    }
+
+    liameJeton = auth.access_token;
+    document.getElementById("liame-mdp").value = "";
+    resultat.textContent = "LIAME réfléchit...";
+
+    const response = await fetch(SUPABASE_URL + "/functions/v1/liame-cerveau", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_PUBLIC_KEY,
+        "Authorization": "Bearer " + liameJeton,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: "Bonjour LIAME, propose-moi un sujet de conversation sur les années 1980."
+      })
+    });
+
+    const data = await response.json();
+    resultat.textContent = response.ok
+      ? data.message
+      : "Erreur cerveau " + response.status + " : " + (data.error || "inconnue");
+
+    if (response.ok && data.message) dire(data.message);
+  } catch (erreur) {
+    resultat.textContent = erreur.message || "Erreur de connexion";
+  }
+});
+ const SUPABASE_URL = "https://ymsetvfrvpqtudvypktn.supabase.co";
+ const Reconnaissance =
  window.SpeechRecognition ||
  window.webkitSpeechRecognition;
 
