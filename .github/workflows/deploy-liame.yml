@@ -23,4 +23,4 @@ jobs:
       - name: Deploy LIAME
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase functions deploy liame-cerveau --project-ref ymsetvfrvpqtudvypktn
+                run: supabase functions deploy liame-cerveau --project-ref ymsetvfrvpqtudvypktn --yes
